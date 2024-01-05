@@ -20,16 +20,17 @@ data = itertools.takewhile(
 
 df = pd.DataFrame.from_records(data)
 
+# Menghapus data set awal dan akhir karena fitur yg tidak digunakan
 df = df.iloc[:, :-1]
 df = df.drop(df.columns[0], axis=1)
 
 # mengubah tipe data file dataset mjd float kareana nilai nullnya -9, 0
 df = df.astype(float)
 
-#mengubah data yang tidak dibutuhkan mjd null
+# mengubah data yang tidak dibutuhkan mjd null
 df.replace(-9.0, np.NaN, inplace=True)
 
-#Memilih 14 fitur yang akan digunakan sesuai dengan deskripsi dataset
+# Memilih 14 fitur yang akan digunakan sesuai dengan deskripsi dataset
 df_selected = df.iloc[:, [1, 2, 7, 8, 10, 14, 17, 30, 36, 38, 39, 42, 49, 56]]
 
 # mengganti nama kolom sesuai dengan 14 nama kolom yang ada pada deskripsi dataset
