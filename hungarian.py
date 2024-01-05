@@ -1,8 +1,9 @@
+# import modul dan pustaka yg akan digunakan
 import itertools
 import pandas as pd
 import numpy as np
-from imblearn.over_sampling import SMOTE
-from sklearn.metrics import accuracy_score
+from imblearn.over_sampling import SMOTE #digunakan untuk mengatasi ketidakseimbangan kelas dalam dataset dengan membuat sampel sintetis dari kelas minoritas.
+from sklearn.metrics import accuracy_score #digunakan untuk mengukur akurasi model klasifikasi.
 import streamlit as st
 import time
 import pickle
@@ -51,11 +52,14 @@ column_mapping = {
   57: 'target'
 }
 
+#Setelah baris kode ini dieksekusi, kolom-kolom dalam df_selected akan memiliki nama yang sesuai dengan mapping yang diberikan oleh column_mapping.
 df_selected.rename(columns=column_mapping, inplace=True)
 
+#menghapus kolom tertentu
 columns_to_drop = ['ca', 'slope','thal']
 df_selected = df_selected.drop(columns_to_drop, axis=1)
 
+#mendapatkan nilai rata-rata yang telah dihitung dari kolom-kolom tertentu dalam DataFrame df_selected.
 meanTBPS = df_selected['trestbps'].dropna()
 meanChol = df_selected['chol'].dropna()
 meanfbs = df_selected['fbs'].dropna()
@@ -77,6 +81,7 @@ meanthalach = round(meanthalach.mean())
 meanexang = round(meanexang.mean())
 meanRestCG = round(meanRestCG.mean())
 
+#berisi pasangan kunci-nilai di mana kunci adalah nama kolom (dalam DataFrame df_selected) dan nilai adalah nilai rata-rata yang telah dihitung sebelumnya untuk kolom tersebut. 
 fill_values = {
   'trestbps': meanTBPS,
   'chol': meanChol,
@@ -86,17 +91,22 @@ fill_values = {
   'restecg':meanRestCG
 }
 
+#membersihkan DataFrame df_selected dari nilai-nilai yang hilang (NaN) dan menghapus duplikat baris
 df_clean = df_selected.fillna(value=fill_values)
 df_clean.drop_duplicates(inplace=True)
 
+#X berisi fitur-fitur yang akan digunakan sebagai input dalam pembuatan model, sementara y berisi nilai target yang akan diprediksi oleh model tersebut.
 X = df_clean.drop("target", axis=1)
 y = df_clean['target']
 
+#dataset yang awalnya tidak seimbang dalam hal jumlah sampel antara kelas minoritas dan mayoritas menjadi lebih seimbang
 smote = SMOTE(random_state=42)
 X, y = smote.fit_resample(X, y)
 
+#modul pickle untuk memuat (load) model yang telah disimpan sebelumnya ke dalam variabel model
 model = pickle.load(open("model/xgb_model.pkl", 'rb'))
 
+#mendapatkan nilai akurasi prediksi model terhadap data yang diberikan (X), dan nilai akurasi ini disimpan dalam bentuk persentase.
 y_pred = model.predict(X)
 accuracy = accuracy_score(y, y_pred)
 accuracy = round((accuracy * 100), 2)
